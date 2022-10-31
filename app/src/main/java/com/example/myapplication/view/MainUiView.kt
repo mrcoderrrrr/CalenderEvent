@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.myapplication.configuration.ApplicationConfig
+import com.example.myapplication.components.UiComponents
 import com.example.myapplication.room.EventDatabase
 import com.example.myapplication.room.EventModel
 import com.example.myapplication.ui.theme.MyApplicationTheme
@@ -36,6 +37,7 @@ suspend fun submitClick(context: Context, title: String, desc: String, date: Str
     eventModel = EventModel(0, title, desc, date)
     GlobalScope.launch {
         EventDatabase.getInstance(context).eventDao().insertData(eventModel)
+        Toast.makeText(context,"Save Data",Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -66,15 +68,15 @@ fun MainUi() {
         )
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        ApplicationConfig.HeaderText(text = headerText)
-        ApplicationConfig.TitleText(text = title, onValueChange = { title = it }, label = "Title")
-        ApplicationConfig.TitleText(
+        UiComponents.HeaderText(text = headerText)
+        UiComponents.TitleText(text = title, onValueChange = { title = it }, label = "Title")
+        UiComponents.TitleText(
             text = desc,
             onValueChange = { desc = it },
             label = "Description"
         )
-        ApplicationConfig.NormalText(text = date, onTextClick = { onDatePicker() })
-        ApplicationConfig.ButtonClick(
+        UiComponents.NormalText(text = date, onTextClick = { onDatePicker() })
+        UiComponents.ButtonClick(
             text = "Submit",
             onButtonClick = {
                 GlobalScope.launch { submitClick(context, title, desc, date) }
