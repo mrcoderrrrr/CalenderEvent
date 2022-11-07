@@ -8,7 +8,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -35,9 +37,9 @@ class MainUiView : ComponentActivity() {
 suspend fun submitClick(context: Context, title: String, desc: String, date: String) {
     val eventModel: EventModel
     eventModel = EventModel(0, title, desc, date)
-    GlobalScope.launch {
+    CoroutineScope(Dispatchers.IO).launch {
         EventDatabase.getInstance(context).eventDao().insertData(eventModel)
-        Toast.makeText(context,"Save Data",Toast.LENGTH_SHORT).show()
+//        Toast.makeText(context,"Save Data",Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -48,7 +50,7 @@ fun MainUi() {
     val headerText by remember { mutableStateOf("Create Event") }
     var title by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
-    val date by remember { mutableStateOf("Date") }
+   // val date by remember { mutableStateOf("Date") }
 
     val mYear: Int
     val mMonth: Int
@@ -58,15 +60,14 @@ fun MainUi() {
     mMonth = mCalendar.get(Calendar.MONTH)
     mDay = mCalendar.get(Calendar.DAY_OF_MONTH)
     mCalendar.time = Date()
-    val mDate = remember { mutableStateOf("") }
-    fun onDatePicker() {
-        val mDatePickerDialog = DatePickerDialog(
+    val mDate = remember { mutableStateOf("Date") }
+    val mDatePickerDialog = DatePickerDialog(
             context,
             { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
                 mDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
             }, mYear, mMonth, mDay
         )
-    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         UiComponents.HeaderText(text = headerText)
         UiComponents.TitleText(text = title, onValueChange = { title = it }, label = "Title")
@@ -75,11 +76,17 @@ fun MainUi() {
             onValueChange = { desc = it },
             label = "Description"
         )
-        UiComponents.NormalText(text = date, onTextClick = { onDatePicker() })
+        Row(modifier = Modifier.fillMaxWidth()) {
+            UiComponents.NormalText(text = mDate.value, onTextClick = {
+
+            })
+            UiComponents.IconClick(onIconClick = {mDatePickerDialog.show()})
+        }
+
         UiComponents.ButtonClick(
             text = "Submit",
             onButtonClick = {
-                GlobalScope.launch { submitClick(context, title, desc, date) }
+                CoroutineScope(Dispatchers.IO).launch { submitClick(context, title, desc, mDate.value) }
             })
     }
 }
